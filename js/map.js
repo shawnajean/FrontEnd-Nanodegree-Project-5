@@ -9,7 +9,7 @@ var initializeMap = function() {
 }
 
 var addMarker = function( locale ) {
-
+  // String of content to appear in the infoWindow
   contentString = "testing" + locale.name();
 
   infoWindow = new google.maps.InfoWindow({
@@ -22,6 +22,7 @@ var addMarker = function( locale ) {
     title: locale.name()
   });
 
+  // Opens the infoWindow when marker is clicked on
   marker.addListener('click', (function( infoWindow, marker ) {
     return function() {
       infoWindow.open(map, marker);
