@@ -1,6 +1,6 @@
 var initialLocales = [
   {
-    name: 'Bilmore Estate',
+    name: 'Biltmore Estate',
     address: '1 Lodge St',
     city: 'Asheville',
     website: 'http://www.biltmore.com',
@@ -21,14 +21,14 @@ var initialLocales = [
     lat: 35.597606,
     long: -82.556297
   },{
-    name: 'WNC Nature Center',
+    name: 'Western North Carolina Nature Center',
     address: '75 Gashes Creek Rd',
     city: 'Asheville',
     website: 'http://www.wncnaturecenter.com',
     lat: 35.576324,
     long: -82.496252
   },{
-    name: 'Green Man',
+    name: 'Green Man Brewery',
     address: '23 Buxton Ave',
     city: 'Asheville',
     website: 'http://www.greenmanbrewery.com',
@@ -50,7 +50,7 @@ var locale = function( data ) {
   }, this);
 
   this.photos = ko.observableArray([]);
-  this.review = ko.observable('');
+  this.articles = ko.observableArray([]);
 };
 
 var flickrKey = "&api_key=36733d31ced0a6a0512c8c1768e63ec7";
@@ -58,18 +58,21 @@ var flickrGetImgsURL = "https://api.flickr.com/services/rest/?format=json&method
 var flickrImgInfoURL = "https://api.flickr.com/services/rest/?format=json&method=flickr.photos.getInfo&nojsoncallback=1&photo_id=";
 var flickrImg = "http://www.flickr.com/photos/";
 
-var wikiURL = 'http://en.wikiapedia.org/w/api.php?action=opensearch&format=json&callback=wikiCallback&search=';
+var wikiURL = 'http://en.wikipedia.org/w/api.php?action=opensearch&format=json&callback=wikiCallback&search=';
 
 var ViewModel = function() {
   var self = this;
   var flickrImgsAPIURL,
       flickrImgInfoAPIURL,
-      imageList,
-      currentImage,
+      wikiAPIURL,
+      currentList,
+      currentItem,
       newImgURL,
       newAttributionURL,
       newTitle,
-      newCaption;
+      newCaption,
+      headlines,
+      links;
 
   this.initialize = function() {
     // Creates array of locales
@@ -82,6 +85,7 @@ var ViewModel = function() {
     // Get API info for each locale
     this.locales().forEach( function( locale ){
       //self.getImages( locale );
+      self.getWikiArticles( locale );
     });
 
       //Creates map
@@ -100,18 +104,19 @@ var ViewModel = function() {
     $.getJSON( flickrImgsAPIURL, function( data ) {
       console.log( 'success' );
 
-      imageList = data.photos.photo;
+      currentList = data.photos.photo;
 
       if( imageList.length > 0 ){
+        // need to modify this - what if there are 2 images?
         for( var i = 0; i < 4; i ++){
-          currentImage = imageList[i];
+          currentImage = currentList[i];
 
-          newImgURL = 'http://farm' + currentImage.farm + '.static.flickr.com/' + currentImage.server + '/' + currentImage.id + '_' + currentImage.secret + '_m.jpg';
+          newImgURL = 'http://farm' + currentItem.farm + '.static.flickr.com/' + currentItem.server + '/' + currentItem.id + '_' + currentItem.secret + '_m.jpg';
 
-          newAttributionURL = flickrImg + currentImage.owner + "/" + currentImage.id;
+          newAttributionURL = flickrImg + currentItem.owner + "/" + currentItem.id;
 
           // get title & caption info for image
-          flickrImgInfoAPIURL = flickrImgInfoURL + currentImage.id + flickrKey;
+          flickrImgInfoAPIURL = flickrImgInfoURL + currentItem.id + flickrKey;
 
           $.getJSON( flickrImgInfoAPIURL, function( data ){
             newTitle = data.photo.title._content;
@@ -136,7 +141,39 @@ var ViewModel = function() {
     });
 
     //this console.log is running before the JSON calls are finishing. not sure how to fix that. :/ Gonna skip it and move on to loading other API info for the infoWindow.
-    console.log( locale.photos() );
+  };
+
+  // Gets related Wikipedia articles based on locale name
+  this.getWikiArticles = function( locale ) {
+    wikiAPIURL = wikiURL + locale.name();
+
+    var wikiError = function() {
+      console.log( 'wiki error' );
+    }
+
+    var wikiRequestTimeout = setTimeout( wikiError, 8000 );
+
+    $.ajax({
+      url: wikiAPIURL,
+      dataType: "jsonp"
+    }).done(function( response ) {
+      currentList = response[1];
+
+      headlines = response[1];
+      links = response[3];
+
+      currentList.forEach( function( article, index ) {
+        locale.articles.push({
+          title: headlines[index],
+          link: links[index]
+        });
+      });
+
+      clearTimeout(wikiRequestTimeout);
+    }).fail(function( e ) {
+      console.log( 'fail' );
+      console.log( e );
+    });
   };
 
   this.initialize();
