@@ -28,12 +28,12 @@ var initialLocales = [
     lat: 35.576324,
     long: -82.496252
   },{
-    name: 'Mt Mitchell',
-    address: '2388 State Highway 128',
-    city: 'Burnsville',
-    website: 'http://www.ncparks.gov/mount-mitchell-state-park',
-    lat: 35.761977,
-    long: -82.271888
+    name: 'Green Man',
+    address: '23 Buxton Ave',
+    city: 'Asheville',
+    website: 'http://www.greenmanbrewery.com',
+    lat: 35.588918,
+    long: -82.553139
   }
 ];
 
@@ -44,6 +44,10 @@ var locale = function( data ) {
   this.website = ko.observable(data.website);
   this.lat = ko.observable(data.lat);
   this.long = ko.observable(data.long);
+
+  this.latlong = ko.computed( function() {
+    return new google.maps.LatLng( this.lat(), this.long() );
+  }, this);
 };
 
 var ViewModel = function() {
@@ -55,7 +59,11 @@ var ViewModel = function() {
     self.locales.push( new locale( newLoc ) );
   });
 
-  console.log( this.locales() );
+  initializeMap();
+
+  this.locales().forEach( function( locale ) {
+    addMarker( locale );
+  });
 };
 
 ko.applyBindings( new ViewModel() );
