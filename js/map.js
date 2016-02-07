@@ -30,6 +30,7 @@ var addMarker = function( locale ) {
 // Vanilla JS way to listen for resizing of the window
 // and adjust map bounds
 window.addEventListener('resize', function(e) {
+  console.log( 'resized' );
   // Make sure the map bounds get updated on page resize
-  map.fitBounds(mapBounds);
+  map.fitBounds(bounds);
 });
