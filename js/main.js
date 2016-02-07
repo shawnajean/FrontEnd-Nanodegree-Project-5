@@ -49,8 +49,9 @@ var locale = function( data ) {
     return new google.maps.LatLng( this.lat(), this.long() );
   }, this);
 
-  this.photos = ko.observableArray([]);
+  this.images = ko.observableArray([]);
   this.articles = ko.observableArray([]);
+  this.foursquare = ko.observable({});
 };
 
 var flickrKey = "&api_key=36733d31ced0a6a0512c8c1768e63ec7";
@@ -60,11 +61,12 @@ var flickrImg = "http://www.flickr.com/photos/";
 
 var wikiURL = 'http://en.wikipedia.org/w/api.php?action=opensearch&format=json&callback=wikiCallback&search=';
 
+var fsURL = 'https://api.foursquare.com/v2/venues/search?client_id=2IH1WTOFRXTI4TKYONASQSZO4AZVZBD5VSA0YG0R1GA0M4Z1&client_secret=PJGTUYGXQCZEJKGISLVAQWRTEJBGGIBNW5IUIFGFMQB2ZA1S&limit=1&intent=match&v=20140806&m=foursquare&query=';
+
 var ViewModel = function() {
   var self = this;
-  var flickrImgsAPIURL,
+  var APIURL,
       flickrImgInfoAPIURL,
-      wikiAPIURL,
       currentList,
       currentItem,
       newImgURL,
@@ -72,7 +74,8 @@ var ViewModel = function() {
       newTitle,
       newCaption,
       headlines,
-      links;
+      links,
+      i;
 
   this.initialize = function() {
     // Creates array of locales
@@ -84,8 +87,9 @@ var ViewModel = function() {
 
     // Get API info for each locale
     this.locales().forEach( function( locale ){
-      //self.getImages( locale );
+      self.getImages( locale );
       self.getWikiArticles( locale );
+      self.getFourSquare( locale );
     });
 
       //Creates map
@@ -99,53 +103,72 @@ var ViewModel = function() {
 
   // Get Flickr images for specified locale
   this.getImages = function( locale ) {
-    flickrImgsAPIURL = flickrGetImgsURL + '"' + locale.name() + '" ' + locale.city() + flickrKey;
+    APIURL = flickrGetImgsURL + '"' + locale.name() + '" ' + locale.city() + flickrKey;
 
-    $.getJSON( flickrImgsAPIURL, function( data ) {
-      console.log( 'success' );
+    self.callFlickrAPI( self.parseImages, locale );
+  };
 
-      currentList = data.photos.photo;
-
-      if( imageList.length > 0 ){
-        // need to modify this - what if there are 2 images?
-        for( var i = 0; i < 4; i ++){
-          currentImage = currentList[i];
-
-          newImgURL = 'http://farm' + currentItem.farm + '.static.flickr.com/' + currentItem.server + '/' + currentItem.id + '_' + currentItem.secret + '_m.jpg';
-
-          newAttributionURL = flickrImg + currentItem.owner + "/" + currentItem.id;
-
-          // get title & caption info for image
-          flickrImgInfoAPIURL = flickrImgInfoURL + currentItem.id + flickrKey;
-
-          $.getJSON( flickrImgInfoAPIURL, function( data ){
-            newTitle = data.photo.title._content;
-            newCaption = data.photo.description._content;
-          }).fail( function( data, textStatus, error ) {
-            console.log( data );
-            console.error("getJSON failed, status: " + textStatus + ", error: "+error)
-          });
-
-          // add new image to the
-          locale.photos.push({
-            title: newTitle,
-            caption: newCaption,
-            imgURL: newImgURL,
-            attributionURL: newAttributionURL
-          });
-        }
-      }
+  this.callFlickrAPI = function( callback, locale ) {
+    $.getJSON( APIURL, function( data ) {
+      callback(data, locale);
     }).fail( function( data, textStatus, error ) {
       console.log( data );
       console.error("getJSON failed, status: " + textStatus + ", error: "+error)
     });
-
-    //this console.log is running before the JSON calls are finishing. not sure how to fix that. :/ Gonna skip it and move on to loading other API info for the infoWindow.
   };
+
+  this.callFlickrImgAPI = function( callback, locale ) {
+    $.getJSON( flickrImgInfoAPIURL, function( data ){
+        callback( data, locale );
+    }).fail( function( data, textStatus, error ) {
+      console.log( data );
+      console.error("getJSON failed, status: " + textStatus + ", error: "+error)
+    }).done( function() {
+      console.log( 'Loaded image data: ' + locale.name() );
+    });
+  };
+
+  this.parseImages = function( data, locale ) {
+    if( data.photos !== null ) {
+      currentList = data.photos.photo;
+
+      // Once the list has been retrieved go through the first 4 images and add to locale
+      for( i = 0; i < 4 && i < currentList.length; i ++){
+        // reset all imageItem variables
+        currentItem, newImgURL, newAttributionURL, newTitle, newCaption = '';
+
+        currentItem = currentList[i];
+
+        newImgURL = 'http://farm' + currentItem.farm + '.static.flickr.com/' + currentItem.server + '/' + currentItem.id + '_' + currentItem.secret + '_m.jpg';
+
+        newAttributionURL = flickrImg + currentItem.owner + "/" + currentItem.id;
+
+        // get title & caption info for image
+        flickrImgInfoAPIURL = flickrImgInfoURL + currentItem.id + flickrKey;
+
+        self.callFlickrImgAPI( self.addImage, locale );
+      }
+    }
+  };
+
+  this.addImage = function( data, locale ) {
+    if( data.photo !== null ) {
+      newTitle = data.photo.title._content;
+      newCaption = data.photo.description._content;
+
+      // add new image to the locale
+      locale.images.push({
+        title: newTitle,
+        caption: newCaption,
+        imgURL: newImgURL,
+        attributionURL: newAttributionURL
+      });
+    }
+  }
 
   // Gets related Wikipedia articles based on locale name
   this.getWikiArticles = function( locale ) {
-    wikiAPIURL = wikiURL + locale.name();
+    APIURL = wikiURL + locale.name();
 
     var wikiError = function() {
       console.log( 'wiki error' );
@@ -154,7 +177,7 @@ var ViewModel = function() {
     var wikiRequestTimeout = setTimeout( wikiError, 8000 );
 
     $.ajax({
-      url: wikiAPIURL,
+      url: APIURL,
       dataType: "jsonp"
     }).done(function( response ) {
       currentList = response[1];
@@ -173,7 +196,35 @@ var ViewModel = function() {
     }).fail(function( e ) {
       console.log( 'fail' );
       console.log( e );
+    }).done( function() {
+      // console.log( 'Loaded articles: ' + locale.name() );
     });
+  };
+
+  this.getFourSquare = function( locale ) {
+    APIURL = fsURL + locale.name() + '&ll=' + locale.lat() + ',' + locale.long();
+
+    $.getJSON( APIURL, function( data ){
+      currentList = data.response.venues;
+
+      if( currentList.length > 0 ){
+        currentItem = currentList[0];
+
+        locale.foursquare({
+          name: currentItem.name,
+          id: currentItem.id,
+          verified: currentItem.verified,
+          stats: currentItem.stats,
+          categories: currentItem.categories
+        });
+      }
+    }).fail( function( data, textStatus, error ) {
+      console.log( data.responseText );
+      console.error("getJSON failed, status: " + textStatus + ", error: "+error)
+    }).done(function() {
+      // console.log( 'Loaded FS: ' + locale.name() );
+    });
+
   };
 
   this.initialize();
