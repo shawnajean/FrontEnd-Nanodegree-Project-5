@@ -1,6 +1,5 @@
 var map, contentString, infoWindow;
 var bounds = new google.maps.LatLngBounds();
-console.log( bounds );
 
 var initializeMap = function() {
   map = new google.maps.Map(document.getElementById('map'), {
@@ -33,7 +32,6 @@ var addMarker = function( locale ) {
   // bounds.extend() takes in a map location object
   bounds.extend( locale.latlong() );
 
-  console.log( map );
   // fit the map to the new marker
   map.fitBounds(bounds);
   // center the map
@@ -43,7 +41,6 @@ var addMarker = function( locale ) {
 // Vanilla JS way to listen for resizing of the window
 // and adjust map bounds
 window.addEventListener('resize', function(e) {
-  console.log( 'resized' );
   // Make sure the map bounds get updated on page resize
   map.fitBounds(bounds);
 });
