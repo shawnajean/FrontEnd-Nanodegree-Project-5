@@ -37,6 +37,8 @@ var initialLocales = [
   }
 ];
 
+var flickrKey = "36733d31ced0a6a0512c8c1768e63ec7";
+
 var locale = function( data ) {
   this.name = ko.observable(data.name);
   this.address = ko.observable(data.address);

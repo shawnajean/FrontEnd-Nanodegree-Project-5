@@ -1,4 +1,4 @@
-var map;
+var map, contentString, infoWindow;
 var bounds = new google.maps.LatLngBounds();
 console.log( bounds );
 
@@ -10,11 +10,24 @@ var initializeMap = function() {
 }
 
 var addMarker = function( locale ) {
+
+  contentString = "testing" + locale.name();
+
+  infoWindow = new google.maps.InfoWindow({
+    content: contentString
+  });
+
   marker = new google.maps.Marker({
     position: locale.latlong(),
     map: map,
     title: locale.name()
   });
+
+  marker.addListener('click', (function( infoWindow, marker ) {
+    return function() {
+      infoWindow.open(map, marker);
+    }
+  })( infoWindow, marker ));
 
   // this is where the pin actually gets added to the map.
   // bounds.extend() takes in a map location object
