@@ -401,7 +401,7 @@ var ViewModel = function() {
 /*      MAP
 /******************************************************************************************/
 
-  var initializeMap = function() {
+  var initMap = function() {
     map = new google.maps.Map(document.getElementById('map'), {
       center: {lat: 35.6008333, lng: -82.5541667}, // Asheville, NC
       zoom: 12
@@ -442,6 +442,10 @@ var ViewModel = function() {
     // center the map
     map.setCenter(bounds.getCenter());
   };
+
+  var errorHandling = function( e ) {
+
+  }
 
   // Parses INFO_TEXT into HTML for the infoWindows and ko bindings
   var makeContent = function() {
