@@ -179,28 +179,28 @@ var ViewModel = function() {
       // Once the list has been retrieved go through the first 4 images and add to locale
       for( i = 0; i < 4 && i < currentList.length; i ++){
         // reset all imageItem variables
-        currentItem, newImgURL, newAttributionURL, newTitle, newCaption = '';
+        // currentItem, newImgURL, newAttributionURL, newTitle, newCaption = '';
 
         currentItem = currentList[i];
 
-        newImgURL = 'http://farm' + currentItem.farm + '.static.flickr.com/' + currentItem.server + '/' + currentItem.id + '_' + currentItem.secret + '_m.jpg';
-
-        newAttributionURL = FLICKR_IMG + currentItem.owner + "/" + currentItem.id;
+        var newImgURL = 'http://farm' + currentItem.farm + '.static.flickr.com/' + currentItem.server + '/' + currentItem.id + '_' + currentItem.secret + '_m.jpg';
+        console.log( newImgURL );
+        var newAttributionURL = FLICKR_IMG + currentItem.owner + "/" + currentItem.id;
 
         // get title & caption info for image
         flickrImgInfoAPIURL = FLICKR_IMG_INFO_URL + currentItem.id + FLICKR_KEY;
 
-        self.callFlickrImgAPI( locale );
+        self.callFlickrImgAPI( locale, newImgURL, newAttributionURL );
       }
     }
   };
 
   // Sets the newTitle & newCaption from data passed in
   // Adds the image to the specified locale
-  this.addImage = function( data, locale ) {
+  this.addImage = function( data, locale, newImgURL, newAttributionURL ) {
     if( data.photo !== null ) {
-      newTitle = data.photo.title._content;
-      newCaption = data.photo.description._content;
+      var newTitle = data.photo.title._content;
+      var newCaption = data.photo.description._content;
 
       // Saves the image to the locale for later use
       locale.images.push({
@@ -229,9 +229,9 @@ var ViewModel = function() {
 
   // Calls the Flickr flickr.photos.getInfo API for image title & caption
   // Hands the new data off to addImage
-  this.callFlickrImgAPI = function( locale ) {
+  this.callFlickrImgAPI = function( locale, newImgURL, newAttributionURL ) {
     $.getJSON( flickrImgInfoAPIURL, function( data ){
-        self.addImage( data, locale );
+        self.addImage( data, locale, newImgURL, newAttributionURL );
     }).fail( function( data, textStatus, error ) {
       console.log( data );
       console.error("getJSON failed, status: " + textStatus + ", error: "+error)
@@ -350,14 +350,14 @@ var ViewModel = function() {
 /*
 /******************************************************************************************/
 
+  this.initialize();
+
   // Vanilla JS way to listen for resizing of the window
   // and adjust map bounds
   window.addEventListener('resize', function(e) {
     // Make sure the map bounds get updated on page resize
     map.fitBounds(bounds);
   });
-
-  this.initialize();
 };
 
 ko.applyBindings( new ViewModel() );
