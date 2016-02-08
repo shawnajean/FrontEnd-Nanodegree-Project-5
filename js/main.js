@@ -71,6 +71,7 @@ var WIKI_URL = 'http://en.wikipedia.org/w/api.php?action=opensearch&format=json&
 // Foursquare
 var FS_URL = 'https://api.foursquare.com/v2/venues/search?client_id=2IH1WTOFRXTI4TKYONASQSZO4AZVZBD5VSA0YG0R1GA0M4Z1&client_secret=PJGTUYGXQCZEJKGISLVAQWRTEJBGGIBNW5IUIFGFMQB2ZA1S&limit=1&intent=match&v=20140806&m=foursquare&query=';
 var FS_VENUE = 'https://foursquare.com/v/';
+var FS_REF = 'ref=2IH1WTOFRXTI4TKYONASQSZO4AZVZBD5VSA0YG0R1GA0M4Z1'
 var FS_IMAGE = 'https://playfoursquare.s3.amazonaws.com/press/2014/foursquare-icon-16x16.png';
 
 // HTML for the infoWindow that pops up when a locale is clicked on
@@ -381,7 +382,7 @@ var ViewModel = function() {
           id: currentItem.id,
           verified: currentItem.verified,
           categories: ko.observableArray(currentItem.categories) || ko.observableArray([]),
-          fsURL: FS_VENUE + currentItem.name.replace(/ /g,"-") + "/" + currentItem.id
+          fsURL: FS_VENUE + currentItem.id + FS_REF
         });
       } else {
         locale.foursquare(null);
