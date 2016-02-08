@@ -210,7 +210,13 @@ var ViewModel = function() {
         });
       }
     });
-  }
+  };
+
+  this.searchCategory = function( category ) {
+    $('.search').val( category.name );
+
+    $('.search').keyup();
+  };
 
 /******************************************************************************************/
 /*      API HANDLERS/HELPERS
