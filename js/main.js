@@ -63,7 +63,7 @@ var INFO_TEXT =  '<div data-bind="with: currentLocale" id="info-window">'+
                   '<div id="bodyContent">'+
                     '<div id="iw-images">' +
                     '<!-- ko foreach: images -->' +
-                    '<img data-bind="attr: {src: imgURL, title: title}" src="" title="">' +
+                    '<a data-bind="attr: {href: attributionURL}" href=""><img data-bind="attr: {src: imgURL, title: title}" src="" title=""></a>' +
                     '<!-- /ko -->' +
                     '</div>' +
                   '</div>'+
