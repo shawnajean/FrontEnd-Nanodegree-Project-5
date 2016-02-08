@@ -319,62 +319,19 @@ var ViewModel = function() {
   };
 
   this.alertError = function( type ) {
-    // Checks that there isn't already an error of that type
-    var showError = false;
-
-    switch ( type ) {
-      case "Wikipedia articles":
-        if( !wikiError ) {
-          showError = true;
-        }
-        break;
-      case "Flickr images":
-        if( !flickrError ) {
-          showError = true;
-        }
-        break;
-      case "Foursquare info":
-        if( !foursquareError ) {
-          showError = true;
-        }
-        break;
-    }
-
-    if( showError ) {
-      self.setAlert( type )
-    }
-  };
-
-  this.setAlert = function( type ) {
     if( type.length > 0 ) {
       tempString = ERROR_MSG.replace( /%identity%/g, type );
     } else {
       tempString = ERROR_MSG.replace( /%identity%/g, 'the app' );
     }
 
-    console.log( tempString );
-
     self.errorHandler( tempString );
 
     setTimeout( function() {
-      //animate the error message fading out
+
       self.errorHandler('');
       self.clearAlert( type );
     }, 10000);
-  };
-
-  this.clearAlert = function( type ) {
-    switch ( type ) {
-      case "Wikipedia articles":
-        self.wikiError = false;
-        break;
-      case "Flickr images":
-        self.flickrError = false;
-        break;
-      case "Foursquare info":
-        self.foursquareError = false;
-        break;
-    }
   };
 
 /******************************************************************************************/
