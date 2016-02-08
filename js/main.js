@@ -356,11 +356,11 @@ var ViewModel = function() {
 
     self.errorHandler( tempString );
 
-    // setTimeout( function() {
-    //   //animate the error message fading out
-    //   self.errorHandler('');
-    //   self.clearAlert( type );
-    // }, 10000);
+    setTimeout( function() {
+      //animate the error message fading out
+      self.errorHandler('');
+      self.clearAlert( type );
+    }, 10000);
   };
 
   this.clearAlert = function( type ) {

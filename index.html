@@ -23,11 +23,10 @@
 
     <script type="text/javascript">
       var errorHandling = function() {
-        var temp = document.createElement( 'div' );
-        temp.className += ( 'error' );
+        var temp = document.getElementsByClassName( 'error' )[0];
         temp.innerText = "Apologies! We're unable to load Google Maps at this time. Try refreshing the page!";
 
-        document.body.insertBefore( temp, document.body.childNodes[0] );
+        console.log( temp );
       };
     </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
