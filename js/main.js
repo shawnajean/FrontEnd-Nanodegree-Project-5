@@ -298,11 +298,11 @@ var ViewModel = function() {
     var tempString = '';
     console.log( 'rating: ' + rating );
 
-    for( var i = 0; i < stars; i++ ) {
+    for( i = 0; i < stars; i++ ) {
       tempString += '★';
     }
 
-    for( var i = 0; i < 5 - stars; i++ ) {
+    for( i = 0; i < 5 - stars; i++ ) {
       tempString += '☆';
     }
 
@@ -445,7 +445,7 @@ var ViewModel = function() {
 
   var errorHandling = function( e ) {
 
-  }
+  };
 
   // Parses INFO_TEXT into HTML for the infoWindows and ko bindings
   var makeContent = function() {
