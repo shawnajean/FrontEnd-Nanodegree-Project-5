@@ -7,9 +7,9 @@
     <meta name=viewport content="width=device-width, height=device-height, initial-scale=1">
   </head>
   <body>
-    <div id="overlay">
+    <div id="overlay" class="overlay">
       <input data-bind="value: query, valueUpdate: 'keyup'" class="search" placeholder="Search.." />
-      <ul data-bind="foreach: locales" id="locale-list">
+      <ul data-bind="foreach: locales" id="locale-list" class="locale-list">
         <li>
           <span data-bind="text: name, click: $root.selectLocale" class="name"></span>
           <!-- ko if: foursquare() -->
@@ -20,7 +20,7 @@
         </li>
       </ul>
     </div>
-    <div id="map"></div>
+    <div id="map" class="map"></div>
 
     <script src="js/libs/knockout-3.4.0.js"></script>
     <script src="js/main.js"></script>

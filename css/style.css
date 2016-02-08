@@ -1,11 +1,12 @@
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
 }
 
-#overlay {
+.overlay {
   background: #333;
   color: #fff;
   position: absolute;
@@ -15,32 +16,32 @@ html, body {
   height: 45%;
 }
 
-#overlay .search {
+.overlay .search {
   display: block;
   width: 94%;
   padding: 5px;
   margin: 5px auto;
 }
 
-ul#locale-list {
+.locale-list {
   list-style-type: none;
   margin: 0;
   padding: 0;
   padding-bottom: auto;
 }
 
-ul#locale-list li {
+.locale-list li {
   position: relative;
   min-height: 40px;
   padding: 10px 18px 7px;
   border-bottom: #888 1px solid;
 }
 
-ul#locale-list li:hover {
+.locale-list li:hover {
   background-color: #999;
 }
 
-#overlay a {
+.overlay a {
   position: absolute;
   color: #fff;
   font-size: .7em;
@@ -48,30 +49,30 @@ ul#locale-list li:hover {
   bottom: 12px;
 }
 
-#map {
+.map {
   height: 55%;
   overflow: hidden;
 }
 
-#iw-images img {
+.iw-images img {
   height: 75px;
   width: 75px;
   padding: 5px;
 }
 
-#foursquare {
+.foursquare {
   display: inline;
   float: right;
 }
 
 @media screen and (min-width: 768px) {
-  #overlay {
+  .overlay {
     float: left;
     height: 100%;
     width: 25%;
   }
 
-  #overlay .search {
+  .overlay .search {
     display: block;
     width: 94%;
     height: 23px;
@@ -81,7 +82,7 @@ ul#locale-list li:hover {
     padding: .5%;
   }
 
-  #map {
+  .map {
     float: right;
     height: 100%;
     width: 75%;

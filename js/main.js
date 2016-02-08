@@ -78,15 +78,15 @@ var FS_IMAGE = 'https://playfoursquare.s3.amazonaws.com/press/2014/foursquare-ic
 
 // HTML for the infoWindow that pops up when a locale is clicked on
 var INFO_TEXT =  '<div data-bind="with: currentLocale" id="info-window">'+
-                  '<h1 data-bind="text: name" id="iw-title"></h1>'+
+                  '<h1 data-bind="text: name" id="iw-title" class="iw-title"></h1>'+
                   '<div id="bodyContent">'+
-                    '<div data-bind="if: foursquare()" id="foursquare">' +
+                    '<div data-bind="if: foursquare()" id="foursquare" class="foursquare">' +
                       '<a data-bind="attr: {href: foursquare().fsURL}" href=""><img alt="Check in on Foursquare!" src="' + FS_IMAGE + '"></a>' +
                       '<span data-bind="visible: foursquare().verified" id="verified">✓</span>' +
                     '</div>' +
                     '<p><span data-bind="text: address"></span><br><span data-bind="text: city"></span>, NC</p>' +
                     '<a data-bind="text: website, attr: {href: website}" href=""></a>' +
-                    '<div data-bind="visible: images().length > 0, foreach: images" id="iw-images">' +
+                    '<div data-bind="visible: images().length > 0, foreach: images" id="iw-images" class="iw-images">' +
                       '<a data-bind="attr: {href: attributionURL}" href=""><img data-bind="attr: {src: imgURL, title: title}" src="" title=""></a>' +
                     '</div>' +
 
@@ -159,13 +159,13 @@ var ViewModel = function() {
     });
 
       //Creates map
-      initializeMap();
+      initMap();
 
       // Adds each locale as a marker on the map
       self.locales().forEach( function( locale ) {
         addMarker( locale, self );
       });
-  }
+  };
 
   // Sets current active marker
   this.setCurrentLocale = function( locale ) {
@@ -309,7 +309,7 @@ var ViewModel = function() {
     console.log( tempString );
 
     return tempString;
-  }
+  };
 
 /******************************************************************************************/
 /*      API CALLS
@@ -322,7 +322,7 @@ var ViewModel = function() {
       self.parseImages( data, locale );
     }).fail( function( data, textStatus, error ) {
       console.log( data );
-      console.error("getJSON failed, status: " + textStatus + ", error: "+error)
+      console.error("getJSON failed, status: " + textStatus + ", error: "+error);
     });
   };
 
@@ -333,7 +333,7 @@ var ViewModel = function() {
         self.addImage( data, locale, newImgURL, newAttributionURL );
     }).fail( function( data, textStatus, error ) {
       console.log( data );
-      console.error("getJSON failed, status: " + textStatus + ", error: "+error)
+      console.error("getJSON failed, status: " + textStatus + ", error: "+error);
     });
   };
 
@@ -343,7 +343,7 @@ var ViewModel = function() {
 
     var wikiError = function() {
       console.log( 'wiki error' );
-    }
+    };
 
     var wikiRequestTimeout = setTimeout( wikiError, 8000 );
 
@@ -393,7 +393,7 @@ var ViewModel = function() {
       }
     }).fail( function( data, textStatus, error ) {
       console.log( data.responseText );
-      console.error("getJSON failed, status: " + textStatus + ", error: "+error)
+      console.error("getJSON failed, status: " + textStatus + ", error: "+error);
     });
   };
 
