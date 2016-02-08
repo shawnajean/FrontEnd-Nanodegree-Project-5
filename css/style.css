@@ -66,13 +66,10 @@ ul#locale-list li:hover {
 
 @media screen and (min-width: 768px) {
   #overlay {
-    background: red;
-      float: left;
-      height: 100%;
-      width: 25%;
-      max-width: 325px;
+    float: left;
+    height: 100%;
+    width: 25%;
   }
-
 
   #overlay .search {
     display: block;
@@ -89,7 +86,4 @@ ul#locale-list li:hover {
     height: 100%;
     width: 75%;
   }
-  /*
-
-  */
 }
