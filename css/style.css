@@ -73,12 +73,7 @@ ul#locale-list li:hover {
       max-width: 325px;
   }
 
-  #map {
-    float: right;
-    height: 100%;
-    width: 75%;
-  }
-  /*
+
   #overlay .search {
     display: block;
     width: 94%;
@@ -88,6 +83,13 @@ ul#locale-list li:hover {
     text-align: center;
     padding: .5%;
   }
+
+  #map {
+    float: right;
+    height: 100%;
+    width: 75%;
+  }
+  /*
 
   */
 }
