@@ -8,12 +8,13 @@ html, body {
   height: 100%;
 }
 
-#iw-images {
-  
-}
-
 #iw-images img {
   height: 75px;
   width: 75px;
   padding: 5px;
+}
+
+#foursquare {
+  display: inline;
+  float: right;
 }

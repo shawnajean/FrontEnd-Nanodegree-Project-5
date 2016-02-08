@@ -77,15 +77,16 @@ var FS_IMAGE = 'https://playfoursquare.s3.amazonaws.com/press/2014/foursquare-ic
 var INFO_TEXT =  '<div data-bind="with: currentLocale" id="info-window">'+
                   '<h1 data-bind="text: name" id="iw-title"></h1>'+
                   '<div id="bodyContent">'+
+                    '<div data-bind="if: foursquare() " id="foursquare">' +
+                      '<a data-bind="attr: {href: foursquare().fsURL}" href=""><img alt="Check in on Foursquare!" src="' + FS_IMAGE + '"></a>' +
+                      '<span data-bind="visible: foursquare().verified" id="verified">✓</span>' +
+                    '</div>' +
                     '<p><span data-bind="text: address"></span><br><span data-bind="text: city"></span>, NC</p>' +
                     '<a data-bind="text: website, attr: {href: website}" href=""></a>' +
                     '<div data-bind="visible: images().length > 0, foreach: images" id="iw-images">' +
                       '<a data-bind="attr: {href: attributionURL}" href=""><img data-bind="attr: {src: imgURL, title: title}" src="" title=""></a>' +
                     '</div>' +
-                    '<div data-bind="if: foursquare() " id="foursquare">' +
-                      '<h3>Foursquare Stats</h3>' +
-                      '<a data-bind="attr: {href: foursquare().fsURL}" href=""><img alt="Check in on Foursquare!" src="' + FS_IMAGE + '"></a>' +
-                    '</div>' +
+
                     '<h3 data-bind="visible: articles().length > 0">Related Articles</h3>' +
                     '<ul data-bind="foreach: articles">' +
                       '<li><a data-bind="text: title, attr: {href: link}" href=""></a></li>' +
@@ -171,7 +172,7 @@ var ViewModel = function() {
   }
 
 /******************************************************************************************/
-/*      API HANDLERS
+/*      API HANDLERS/HELPERS
 /******************************************************************************************/
 
   // Get Flickr images for specified locale
@@ -222,6 +223,25 @@ var ViewModel = function() {
         attributionURL: newAttributionURL
       });
     }
+  };
+
+  // Takes a Foursquare rating (1-10) and creates a string of stars
+  this.getRatingString = function( rating ) {
+    var stars = Math.ceil(rating / 2);
+    var tempString = '';
+    console.log( 'rating: ' + rating );
+
+    for( var i = 0; i < stars; i++ ) {
+      tempString += '★';
+    }
+
+    for( var i = 0; i < 5 - stars; i++ ) {
+      tempString += '☆';
+    }
+
+    console.log( tempString );
+
+    return tempString;
   }
 
 /******************************************************************************************/
@@ -298,7 +318,6 @@ var ViewModel = function() {
           name: currentItem.name,
           id: currentItem.id,
           verified: currentItem.verified,
-          rating: currentItem.rating,
           fsURL: FS_VENUE + currentItem.name.replace(/ /g,"-") + "/" + currentItem.id
         });
       } else {
@@ -334,7 +353,6 @@ var ViewModel = function() {
 
     // Opens the infoWindow when marker is clicked on
     google.maps.event.addListener(marker, 'click', function( ) {
-      console.log( locale.name() );
       var current = self.getCurrentLocale();
 
       self.setCurrentLocale( locale ).done( (function() {
