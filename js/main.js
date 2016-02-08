@@ -58,17 +58,6 @@ var locale = function( data ) {
 /*      CONSTANTS
 /******************************************************************************************/
 
-var INFO_TEXT =  '<div data-bind="with: currentLocale" id="info-window">'+
-                  '<h1 data-bind="text: name" id="iw-title"></h1>'+
-                  '<div id="bodyContent">'+
-                    '<div id="iw-images">' +
-                    '<!-- ko foreach: images -->' +
-                    '<a data-bind="attr: {href: attributionURL}" href=""><img data-bind="attr: {src: imgURL, title: title}" src="" title=""></a>' +
-                    '<!-- /ko -->' +
-                    '</div>' +
-                  '</div>'+
-                '</div>';
-
 // Variable definitions for API calls
 // Flickr
 var FLICKR_KEY = "&api_key=36733d31ced0a6a0512c8c1768e63ec7";
@@ -81,6 +70,29 @@ var WIKI_URL = 'http://en.wikipedia.org/w/api.php?action=opensearch&format=json&
 
 // Foursquare
 var FS_URL = 'https://api.foursquare.com/v2/venues/search?client_id=2IH1WTOFRXTI4TKYONASQSZO4AZVZBD5VSA0YG0R1GA0M4Z1&client_secret=PJGTUYGXQCZEJKGISLVAQWRTEJBGGIBNW5IUIFGFMQB2ZA1S&limit=1&intent=match&v=20140806&m=foursquare&query=';
+var FS_VENUE = 'https://foursquare.com/v/';
+var FS_IMAGE = 'https://playfoursquare.s3.amazonaws.com/press/2014/foursquare-icon-16x16.png';
+
+// HTML for the infoWindow that pops up when a locale is clicked on
+var INFO_TEXT =  '<div data-bind="with: currentLocale" id="info-window">'+
+                  '<h1 data-bind="text: name" id="iw-title"></h1>'+
+                  '<div id="bodyContent">'+
+                    '<p><span data-bind="text: address"></span><br><span data-bind="text: city"></span>, NC</p>' +
+                    '<a data-bind="text: website, attr: {href: website}" href=""></a>' +
+                    '<div data-bind="visible: images().length > 0, foreach: images" id="iw-images">' +
+                      '<a data-bind="attr: {href: attributionURL}" href=""><img data-bind="attr: {src: imgURL, title: title}" src="" title=""></a>' +
+                    '</div>' +
+                    '<div data-bind="if: foursquare() " id="foursquare">' +
+                      '<h3>Foursquare Stats</h3>' +
+                      '<a data-bind="attr: {href: foursquare().fsURL}" href=""><img alt="Check in on Foursquare!" src="' + FS_IMAGE + '"></a>' +
+                    '</div>' +
+                    '<h3 data-bind="visible: articles().length > 0">Related Articles</h3>' +
+                    '<ul data-bind="foreach: articles">' +
+                      '<li><a data-bind="text: title, attr: {href: link}" href=""></a></li>' +
+                    '</ul>' +
+                  '</div>'+
+                '</div>';
+
 
 /******************************************************************************************/
 /*      VIEW MODEL
@@ -184,7 +196,7 @@ var ViewModel = function() {
         currentItem = currentList[i];
 
         var newImgURL = 'http://farm' + currentItem.farm + '.static.flickr.com/' + currentItem.server + '/' + currentItem.id + '_' + currentItem.secret + '_m.jpg';
-        console.log( newImgURL );
+
         var newAttributionURL = FLICKR_IMG + currentItem.owner + "/" + currentItem.id;
 
         // get title & caption info for image
@@ -286,9 +298,11 @@ var ViewModel = function() {
           name: currentItem.name,
           id: currentItem.id,
           verified: currentItem.verified,
-          stats: currentItem.stats,
-          categories: currentItem.categories
+          rating: currentItem.rating,
+          fsURL: FS_VENUE + currentItem.name.replace(/ /g,"-") + "/" + currentItem.id
         });
+      } else {
+        locale.foursquare(null);
       }
     }).fail( function( data, textStatus, error ) {
       console.log( data.responseText );
