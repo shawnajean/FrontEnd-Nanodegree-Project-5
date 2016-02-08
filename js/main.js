@@ -99,7 +99,9 @@ var INFO_TEXT =  '<div data-bind="with: currentLocale" id="info-window">'+
                   '</div>'+
                 '</div>';
 
-
+var ERROR_HTML =  '<div class="error">' +
+                    "Apologies! We're unable to load %identity% at this time. Try refreshing the page!"
+                  '</div>';
 /******************************************************************************************/
 /*      VIEW MODEL
 /******************************************************************************************/
@@ -311,6 +313,22 @@ var ViewModel = function() {
     return tempString;
   };
 
+  this.alertError = function( type ) {
+    switch( type ) {
+      case "Wikipedia":
+        // HTMLemail.replace( /%data%/g, currentList.contacts.email )
+        break;
+      case "Foursquare":
+        // HTMLemail.replace( /%data%/g, currentList.contacts.email )
+        break;
+      case "Flickr":
+        // HTMLemail.replace( /%data%/g, currentList.contacts.email )
+        break;
+      default:
+        // HTMLemail.replace( /%data%/g, currentList.contacts.email )
+    }
+  };
+
 /******************************************************************************************/
 /*      API CALLS
 /******************************************************************************************/
@@ -495,8 +513,4 @@ var initApp = function() {
   viewModel.query.subscribe( viewModel.search );
 
   ko.applyBindings( viewModel );
-};
-
-var errorHandling = function( e ) {
-  console.log( e );
 };

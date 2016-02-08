@@ -2,8 +2,6 @@
 <html>
   <head>
     <link rel="stylesheet" href="css/style.css">
-    <script onerror="errorHandling()" src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-    <script async defer onerror="errorHandling()" src="https://maps.googleapis.com/maps/api/js?libraries=places&callback=initApp"></script>
     <meta name=viewport content="width=device-width, height=device-height, initial-scale=1">
   </head>
   <body>
@@ -22,6 +20,17 @@
     </div>
     <div id="map" class="map"></div>
 
+    <script type="text/javascript">
+      var errorHandling = function() {
+        var temp = document.createElement( 'div' );
+        temp.className += ( 'error' );
+        temp.innerText = "Apologies! We're unable to load Google Maps at this time. Try refreshing the page!";
+
+        document.body.insertBefore( temp, document.body.childNodes[0] );
+      };
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script async defer onerror="errorHandling()" src="https://maps.googleapis.com/maps/api/js?libraries=places&callback=initApp"></script>
     <script src="js/libs/knockout-3.4.0.js"></script>
     <script src="js/main.js"></script>
   </body>
