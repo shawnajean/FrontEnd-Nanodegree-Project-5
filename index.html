@@ -7,8 +7,16 @@
   </head>
   <body>
     <div id="overlay">
+      <input data-bind="value: query, valueUpdate: 'keyup'" class="search" placeholder="Search.." />
       <ul data-bind="foreach: locales" id="locale-list">
-        <li data-bind="text: name, click: $root.selectLocale"></li>
+        <li>
+          <span data-bind="text: name, click: $root.selectLocale" class="name"></span>
+          <!-- ko if: foursquare() -->
+            <!-- ko foreach: foursquare().categories -->
+            <a data-bind="click: $root.searchCategory" href="#"><em data-bind="text: name" class="category"></em></a>
+            <!-- /ko -->
+          <!-- /ko -->
+        </li>
       </ul>
     </div>
     <div id="map"></div>

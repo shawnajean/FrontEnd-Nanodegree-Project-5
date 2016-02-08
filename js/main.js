@@ -51,7 +51,7 @@ var locale = function( data ) {
 
   this.images = ko.observableArray([]);
   this.articles = ko.observableArray([]);
-  this.foursquare = ko.observable({});
+  this.foursquare = ko.observableArray([]);
 };
 
 /******************************************************************************************/
@@ -77,7 +77,7 @@ var FS_IMAGE = 'https://playfoursquare.s3.amazonaws.com/press/2014/foursquare-ic
 var INFO_TEXT =  '<div data-bind="with: currentLocale" id="info-window">'+
                   '<h1 data-bind="text: name" id="iw-title"></h1>'+
                   '<div id="bodyContent">'+
-                    '<div data-bind="if: foursquare() " id="foursquare">' +
+                    '<div data-bind="if: foursquare()" id="foursquare">' +
                       '<a data-bind="attr: {href: foursquare().fsURL}" href=""><img alt="Check in on Foursquare!" src="' + FS_IMAGE + '"></a>' +
                       '<span data-bind="visible: foursquare().verified" id="verified">✓</span>' +
                     '</div>' +
@@ -124,7 +124,12 @@ var ViewModel = function() {
 
   var bounds = new google.maps.LatLngBounds();
 
+  this.locales = ko.observableArray([]);
+  this.localesCopy = ko.observableArray([]);
+
   this.currentLocale = ko.observable('');
+
+  this.query = ko.observable('');
 
 /******************************************************************************************/
 /*      FUNCTIONS
@@ -133,7 +138,6 @@ var ViewModel = function() {
   // Initializes the app
   this.initialize = function() {
     // Creates array of locales
-    this.locales = ko.observableArray([]);
 
     initialLocales.forEach( function( newLoc ) {
       self.locales.push( new locale( newLoc ) );
@@ -152,11 +156,12 @@ var ViewModel = function() {
       initializeMap();
 
       // Adds each locale as a marker on the map
-      this.locales().forEach( function( locale ) {
+      self.locales().forEach( function( locale ) {
         addMarker( locale, self );
       });
   }
 
+  // Sets current active marker
   this.setCurrentLocale = function( locale ) {
     var defer = $.Deferred();
 
@@ -167,15 +172,44 @@ var ViewModel = function() {
     return defer;
   };
 
-  this.getCurrentLocale = function( locale ) {
-    return self.currentLocale;
-  }
-
+  // Sets currentLocale and activates infoWindow
   this.selectLocale = function( locale ) {
+    self.setCurrentLocale( locale );
+
     map.setCenter( locale.latlong() );
 
     google.maps.event.trigger( locale.marker, 'click' );
+  };
 
+/******************************************************************************************/
+/*      SEARCH
+/******************************************************************************************/
+
+  this.search = function( value ) {
+    console.log( value );
+    if( self.locales().length === 5 ) {
+      // Make a copy of the locales to compare with
+      self.localesCopy( self.locales.slice(0) );
+    }
+
+    // Empty current array
+    self.locales.removeAll();
+
+    self.localesCopy().forEach( function( locale ) {
+      console.log( 'searching' );
+      // If the search string matches the name of the locale
+      if( locale.name().toLowerCase().indexOf( value.toLowerCase() ) >= 0 ) {
+        self.locales.push( locale );
+      }
+      // Or if the search string matches a foursquare category of the locale
+      else if ( locale.foursquare() != null ) {
+        locale.foursquare().categories().forEach( function( category ) {
+          if( category.name.toLowerCase().indexOf( value.toLowerCase() ) >= 0 ) {
+            self.locales.push( locale );
+          }
+        });
+      }
+    });
   }
 
 /******************************************************************************************/
@@ -325,6 +359,7 @@ var ViewModel = function() {
           name: currentItem.name,
           id: currentItem.id,
           verified: currentItem.verified,
+          categories: ko.observableArray(currentItem.categories) || ko.observableArray([]),
           fsURL: FS_VENUE + currentItem.name.replace(/ /g,"-") + "/" + currentItem.id
         });
       } else {
@@ -362,8 +397,6 @@ var ViewModel = function() {
 
     // Opens the infoWindow when marker is clicked on
     google.maps.event.addListener(marker, 'click', function( ) {
-      var current = self.getCurrentLocale();
-
       self.setCurrentLocale( locale ).done( (function() {
         infoWindow.setContent( marker.content );
       })(marker));
@@ -387,6 +420,7 @@ var ViewModel = function() {
     tempString = $.parseHTML(INFO_TEXT)[0];
     return tempString;
   };
+
 /******************************************************************************************/
 /*
 /******************************************************************************************/
@@ -403,6 +437,11 @@ var ViewModel = function() {
   google.maps.event.addListener(map, 'click', function() {
     infoWindow.close();
   });
+
 };
 
-ko.applyBindings( new ViewModel() );
+viewModel = new ViewModel();
+
+viewModel.query.subscribe( viewModel.search );
+
+ko.applyBindings( viewModel );
