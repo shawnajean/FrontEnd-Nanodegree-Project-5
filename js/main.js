@@ -131,6 +131,8 @@ var ViewModel = function() {
 
   this.query = ko.observable('');
 
+  this.markers = ko.observableArray([]);
+
 /******************************************************************************************/
 /*      FUNCTIONS
 /******************************************************************************************/
@@ -186,7 +188,7 @@ var ViewModel = function() {
 /******************************************************************************************/
 
   this.search = function( value ) {
-    console.log( value );
+
     if( self.locales().length === 5 ) {
       // Make a copy of the locales to compare with
       self.localesCopy( self.locales.slice(0) );
@@ -195,25 +197,38 @@ var ViewModel = function() {
     // Empty current array
     self.locales.removeAll();
 
+    // And hide markers
+    self.hideAllMarkers();
+
     self.localesCopy().forEach( function( locale ) {
-      console.log( 'searching' );
-      // If the search string matches the name of the locale
-      if( locale.name().toLowerCase().indexOf( value.toLowerCase() ) >= 0 ) {
+
+      if( self.doesMatch( locale, value ) ) {
         self.locales.push( locale );
-      }
-      // Or if the search string matches a foursquare category of the locale
-      else if ( locale.foursquare() != null ) {
-        locale.foursquare().categories().forEach( function( category ) {
-          if( category.name.toLowerCase().indexOf( value.toLowerCase() ) >= 0 ) {
-            self.locales.push( locale );
-          }
-        });
+        locale.marker.setMap( map );
       }
     });
   };
 
+  this.doesMatch = function( locale, value ) {
+    var match = false;
+
+    // If the search string matches the name of the locale
+    if( locale.name().toLowerCase().indexOf( value.toLowerCase() ) >= 0 ) {
+      match = true;
+    } else if ( locale.foursquare() != null ) {
+      // Or if the search string matches a foursquare category of the locale
+      locale.foursquare().categories().forEach( function( category ) {
+        if( category.name.toLowerCase().indexOf( value.toLowerCase() ) >= 0 ) {
+          match = true;
+        }
+      });
+    }
+
+    return match;
+  };
+
   this.searchCategory = function( category ) {
-    $('.search').val( category.name );
+    $('.search').val( category.name.toLowerCase() );
 
     $('.search').keyup();
   };
@@ -399,6 +414,7 @@ var ViewModel = function() {
       content: makeContent()
     });
 
+    self.markers.push( marker );
     locale.marker = marker;
 
     // Opens the infoWindow when marker is clicked on
@@ -422,9 +438,17 @@ var ViewModel = function() {
     map.setCenter(bounds.getCenter());
   };
 
+  // Parses INFO_TEXT into HTML for the infoWindows and ko bindings
   var makeContent = function() {
     tempString = $.parseHTML(INFO_TEXT)[0];
     return tempString;
+  };
+
+  // Hides all markers from map
+  this.hideAllMarkers = function() {
+    self.markers().forEach( function( marker ) {
+      marker.setMap( null );
+    });
   };
 
 /******************************************************************************************/
