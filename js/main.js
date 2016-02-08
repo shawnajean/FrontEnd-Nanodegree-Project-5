@@ -56,6 +56,8 @@ var locale = function( data ) {
   this.foursquare = ko.observableArray([]);
 };
 
+var map;
+
 /******************************************************************************************/
 /*      CONSTANTS
 /******************************************************************************************/
@@ -109,7 +111,6 @@ var ViewModel = function() {
 
   var self = this;
   var APIURL,
-      map,
       infoWindow,
       marker,
       flickrImgInfoAPIURL,
@@ -158,13 +159,12 @@ var ViewModel = function() {
       self.getFourSquare( locale );
     });
 
-      //Creates map
-      initMap();
+    initMap();
 
-      // Adds each locale as a marker on the map
-      self.locales().forEach( function( locale ) {
-        addMarker( locale, self );
-      });
+    // Adds each locale as a marker on the map
+    self.locales().forEach( function( locale ) {
+      addMarker( locale, self );
+    });
   };
 
   // Sets current active marker
@@ -406,7 +406,7 @@ var ViewModel = function() {
       center: {lat: 35.6008333, lng: -82.5541667}, // Asheville, NC
       zoom: 12
     });
-  };
+  }
 
   var addMarker = function( locale ) {
 
@@ -444,10 +444,6 @@ var ViewModel = function() {
     map.fitBounds(bounds);
     // center the map
     map.setCenter(bounds.getCenter());
-  };
-
-  var errorHandling = function( e ) {
-
   };
 
   // Parses INFO_TEXT into HTML for the infoWindows and ko bindings
@@ -493,8 +489,14 @@ var ViewModel = function() {
 
 };
 
-var viewModel = new ViewModel();
+var initApp = function() {
+  var viewModel = new ViewModel();
 
-viewModel.query.subscribe( viewModel.search );
+  viewModel.query.subscribe( viewModel.search );
 
-ko.applyBindings( viewModel );
+  ko.applyBindings( viewModel );
+};
+
+var errorHandling = function( e ) {
+  console.log( e );
+};
