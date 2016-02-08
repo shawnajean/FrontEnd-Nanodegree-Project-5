@@ -99,9 +99,8 @@ var INFO_TEXT =  '<div data-bind="with: currentLocale" id="info-window">'+
                   '</div>'+
                 '</div>';
 
-var ERROR_HTML =  '<div class="error">' +
-                    "Apologies! We're unable to load %identity% at this time. Try refreshing the page!"
-                  '</div>';
+var ERROR_MSG =  "Apologies! We're unable to load %identity% at this time. Try refreshing the page!";
+
 /******************************************************************************************/
 /*      VIEW MODEL
 /******************************************************************************************/
@@ -129,6 +128,10 @@ var ViewModel = function() {
       defer,
       i;
 
+  var wikiError,
+      flickrError,
+      foursquareError = false;
+
   var bounds = new google.maps.LatLngBounds();
 
   this.locales = ko.observableArray([]);
@@ -139,6 +142,8 @@ var ViewModel = function() {
   this.query = ko.observable('');
 
   this.markers = ko.observableArray([]);
+
+  this.errorHandler = ko.observable('');
 
 /******************************************************************************************/
 /*      FUNCTIONS
@@ -314,18 +319,61 @@ var ViewModel = function() {
   };
 
   this.alertError = function( type ) {
-    switch( type ) {
-      case "Wikipedia":
-        // HTMLemail.replace( /%data%/g, currentList.contacts.email )
+    // Checks that there isn't already an error of that type
+    var showError = false;
+
+    switch ( type ) {
+      case "Wikipedia articles":
+        if( !wikiError ) {
+          showError = true;
+        }
         break;
-      case "Foursquare":
-        // HTMLemail.replace( /%data%/g, currentList.contacts.email )
+      case "Flickr images":
+        if( !flickrError ) {
+          showError = true;
+        }
         break;
-      case "Flickr":
-        // HTMLemail.replace( /%data%/g, currentList.contacts.email )
+      case "Foursquare info":
+        if( !foursquareError ) {
+          showError = true;
+        }
         break;
-      default:
-        // HTMLemail.replace( /%data%/g, currentList.contacts.email )
+    }
+
+    if( showError ) {
+      self.setAlert( type )
+    }
+  };
+
+  this.setAlert = function( type ) {
+    if( type.length > 0 ) {
+      tempString = ERROR_MSG.replace( /%identity%/g, type );
+    } else {
+      tempString = ERROR_MSG.replace( /%identity%/g, 'the app' );
+    }
+
+    console.log( tempString );
+
+    self.errorHandler( tempString );
+
+    // setTimeout( function() {
+    //   //animate the error message fading out
+    //   self.errorHandler('');
+    //   self.clearAlert( type );
+    // }, 10000);
+  };
+
+  this.clearAlert = function( type ) {
+    switch ( type ) {
+      case "Wikipedia articles":
+        self.wikiError = false;
+        break;
+      case "Flickr images":
+        self.flickrError = false;
+        break;
+      case "Foursquare info":
+        self.foursquareError = false;
+        break;
     }
   };
 
@@ -338,9 +386,8 @@ var ViewModel = function() {
   this.callFlickrAPI = function( locale ) {
     $.getJSON( APIURL, function( data ) {
       self.parseImages( data, locale );
-    }).fail( function( data, textStatus, error ) {
-      console.log( data );
-      console.error("getJSON failed, status: " + textStatus + ", error: "+error);
+    }).fail( function() {
+      self.alertError( 'Flickr images' );
     });
   };
 
@@ -349,9 +396,8 @@ var ViewModel = function() {
   this.callFlickrImgAPI = function( locale, newImgURL, newAttributionURL ) {
     $.getJSON( flickrImgInfoAPIURL, function( data ){
         self.addImage( data, locale, newImgURL, newAttributionURL );
-    }).fail( function( data, textStatus, error ) {
-      console.log( data );
-      console.error("getJSON failed, status: " + textStatus + ", error: "+error);
+    }).fail( function() {
+      self.alertError( 'Flickr images' );
     });
   };
 
@@ -360,7 +406,7 @@ var ViewModel = function() {
     APIURL = WIKI_URL + locale.name();
 
     var wikiError = function() {
-      console.log( 'wiki error' );
+      self.alertError( 'Wikipedia articles' );
     };
 
     var wikiRequestTimeout = setTimeout( wikiError, 8000 );
@@ -383,8 +429,7 @@ var ViewModel = function() {
 
       clearTimeout(wikiRequestTimeout);
     }).fail(function( e ) {
-      console.log( 'fail' );
-      console.log( e );
+      wikiError();
     });
   };
 
@@ -410,8 +455,7 @@ var ViewModel = function() {
         locale.foursquare(null);
       }
     }).fail( function( data, textStatus, error ) {
-      console.log( data.responseText );
-      console.error("getJSON failed, status: " + textStatus + ", error: "+error);
+      self.alertError( 'Foursquare info' );
     });
   };
 

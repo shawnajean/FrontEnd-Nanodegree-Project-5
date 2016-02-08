@@ -5,6 +5,7 @@
     <meta name=viewport content="width=device-width, height=device-height, initial-scale=1">
   </head>
   <body>
+    <div data-bind="visible: errorHandler().length > 0, text: errorHandler" class="error"></div>
     <div id="overlay" class="overlay">
       <input data-bind="value: query, valueUpdate: 'keyup'" class="search" placeholder="Search.." />
       <ul data-bind="foreach: locales" id="locale-list" class="locale-list">
