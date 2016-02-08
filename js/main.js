@@ -171,6 +171,13 @@ var ViewModel = function() {
     return self.currentLocale;
   }
 
+  this.selectLocale = function( locale ) {
+    map.setCenter( locale.latlong() );
+
+    google.maps.event.trigger( locale.marker, 'click' );
+
+  }
+
 /******************************************************************************************/
 /*      API HANDLERS/HELPERS
 /******************************************************************************************/
@@ -351,6 +358,8 @@ var ViewModel = function() {
       content: makeContent()
     });
 
+    locale.marker = marker;
+
     // Opens the infoWindow when marker is clicked on
     google.maps.event.addListener(marker, 'click', function( ) {
       var current = self.getCurrentLocale();
@@ -389,6 +398,10 @@ var ViewModel = function() {
   window.addEventListener('resize', function(e) {
     // Make sure the map bounds get updated on page resize
     map.fitBounds(bounds);
+  });
+
+  google.maps.event.addListener(map, 'click', function() {
+    infoWindow.close();
   });
 };
 

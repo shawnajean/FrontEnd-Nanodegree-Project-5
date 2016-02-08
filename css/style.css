@@ -4,7 +4,28 @@ html, body {
   padding: 0;
 }
 
+#overlay {
+  float: left;
+  max-width: 25%;
+  height: 100%;
+}
+
+ul#locale-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+ul#locale-list li {
+  padding: 7px 15px 5px;
+}
+
+ul#locale-list li:hover {
+  background-color: #ccc;
+}
+
 #map {
+  overflow: hidden;
   height: 100%;
 }
 

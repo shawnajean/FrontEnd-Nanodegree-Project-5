@@ -6,6 +6,11 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
   </head>
   <body>
+    <div id="overlay">
+      <ul data-bind="foreach: locales" id="locale-list">
+        <li data-bind="text: name, click: $root.selectLocale"></li>
+      </ul>
+    </div>
     <div id="map"></div>
 
     <script src="js/libs/knockout-3.4.0.js"></script>
