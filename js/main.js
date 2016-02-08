@@ -73,7 +73,7 @@ var WIKI_URL = 'http://en.wikipedia.org/w/api.php?action=opensearch&format=json&
 // Foursquare
 var FS_URL = 'https://api.foursquare.com/v2/venues/search?client_id=2IH1WTOFRXTI4TKYONASQSZO4AZVZBD5VSA0YG0R1GA0M4Z1&client_secret=PJGTUYGXQCZEJKGISLVAQWRTEJBGGIBNW5IUIFGFMQB2ZA1S&limit=1&intent=match&v=20140806&m=foursquare&query=';
 var FS_VENUE = 'https://foursquare.com/v/';
-var FS_REF = 'ref=2IH1WTOFRXTI4TKYONASQSZO4AZVZBD5VSA0YG0R1GA0M4Z1'
+var FS_REF = 'ref=2IH1WTOFRXTI4TKYONASQSZO4AZVZBD5VSA0YG0R1GA0M4Z1';
 var FS_IMAGE = 'https://playfoursquare.s3.amazonaws.com/press/2014/foursquare-icon-16x16.png';
 
 // HTML for the infoWindow that pops up when a locale is clicked on
@@ -114,6 +114,7 @@ var ViewModel = function() {
       marker,
       flickrImgInfoAPIURL,
       currentList,
+      listLength,
       currentItem,
       tempString,
       newImgURL,
@@ -218,7 +219,7 @@ var ViewModel = function() {
     // If the search string matches the name of the locale
     if( locale.name().toLowerCase().indexOf( value.toLowerCase() ) >= 0 ) {
       match = true;
-    } else if ( locale.foursquare() != null ) {
+    } else if ( locale.foursquare() !== null ) {
       // Or if the search string matches a foursquare category of the locale
       locale.foursquare().categories().forEach( function( category ) {
         if( category.name.toLowerCase().indexOf( value.toLowerCase() ) >= 0 ) {
@@ -231,9 +232,9 @@ var ViewModel = function() {
   };
 
   this.searchCategory = function( category ) {
-    $('.search').val( category.name.toLowerCase() );
+    self.query( category.name.toLowerCase() );
 
-    $('.search').keyup();
+    self.search( category.name );
   };
 
 /******************************************************************************************/
@@ -253,9 +254,10 @@ var ViewModel = function() {
   this.parseImages = function( data, locale ) {
     if( data.photos !== null ) {
       currentList = data.photos.photo;
+      listLength= currentList.length;
 
       // Once the list has been retrieved go through the first 4 images and add to locale
-      for( i = 0; i < 4 && i < currentList.length; i ++){
+      for( i = 0; i < 4 && i < listLength; i ++){
         // reset all imageItem variables
         // currentItem, newImgURL, newAttributionURL, newTitle, newCaption = '';
 
