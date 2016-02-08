@@ -64,8 +64,11 @@ ul#locale-list li:hover {
   float: right;
 }
 
-/*@media screen and (min-width: 768px) {
+@media screen and (min-width: 768px) {
   #overlay {
+    background: red;
+  }
+  /*#overlay {
     float: left;
     height: 100%;
     width: 25%;
@@ -86,5 +89,5 @@ ul#locale-list li:hover {
     float: right;
     height: 100%;
     width: 75%;
-  }
-}*/
+  }*/
+}
