@@ -64,7 +64,7 @@ ul#locale-list li:hover {
   float: right;
 }
 
-@media screen and (min-width: 750px){
+@media (min-width: 750px){
   #overlay {
     float: left;
     height: 100%;
