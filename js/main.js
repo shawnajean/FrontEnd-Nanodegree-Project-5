@@ -416,7 +416,8 @@ var ViewModel = function() {
       position: locale.latlong(),
       map: map,
       title: locale.name(),
-      content: makeContent()
+      content: makeContent(),
+      animation: google.maps.Animation.DROP
     });
 
     self.markers.push( marker );
@@ -427,6 +428,8 @@ var ViewModel = function() {
       self.setCurrentLocale( locale ).done( (function() {
         infoWindow.setContent( marker.content );
       })(marker));
+
+      self.toggleBounce( locale.marker );
 
       infoWindow.open( map, this );
     });
@@ -451,6 +454,17 @@ var ViewModel = function() {
   var makeContent = function() {
     tempString = $.parseHTML(INFO_TEXT)[0];
     return tempString;
+  };
+
+  this.toggleBounce = function( marker ) {
+    if( marker.getAnimation() !== null ){
+      marker.setAnimation( null );
+    } else {
+      marker.setAnimation( google.maps.Animation.BOUNCE );
+      setTimeout( function() {
+        marker.setAnimation( null );
+      }, 700);
+    }
   };
 
   // Hides all markers from map
