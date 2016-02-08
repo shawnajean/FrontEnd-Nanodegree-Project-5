@@ -1,3 +1,5 @@
+'use strict';
+
 var initialLocales = [
   {
     name: 'Biltmore Estate',
@@ -471,7 +473,7 @@ var ViewModel = function() {
 
 };
 
-viewModel = new ViewModel();
+var viewModel = new ViewModel();
 
 viewModel.query.subscribe( viewModel.search );
 
