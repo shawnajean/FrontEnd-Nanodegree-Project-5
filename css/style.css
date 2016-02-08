@@ -65,6 +65,19 @@ body {
   float: right;
 }
 
+.error {
+  position: relative;
+  top: 15px;
+  width: 80%;
+  background-color: #cc0000;
+  color: white;
+  margin: 0 auto;
+  clear: left;
+  z-index: 99;
+  text-align: center;
+  padding: 15px 0;
+}
+
 @media screen and (min-width: 768px) {
   .overlay {
     float: left;
