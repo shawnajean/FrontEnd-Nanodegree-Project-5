@@ -1,4 +1,4 @@
-var map, contentString, infoWindow;
+var map, infoWindow, marker, html;
 var bounds = new google.maps.LatLngBounds();
 
 var initializeMap = function() {
@@ -6,28 +6,36 @@ var initializeMap = function() {
     center: {lat: 35.6008333, lng: -82.5541667}, // Asheville, NC
     zoom: 12
   });
-}
+};
 
-var addMarker = function( locale ) {
-  // String of content to appear in the infoWindow
-  contentString = "testing" + locale.name();
+var makeContent = function() {
+  html = $.parseHTML(infoText)[0];
+  return html;
+};
 
-  infoWindow = new google.maps.InfoWindow({
-    content: contentString
-  });
+var addMarker = function( locale , viewModel ) {
+
+  infoWindow = new google.maps.InfoWindow();
 
   marker = new google.maps.Marker({
     position: locale.latlong(),
     map: map,
-    title: locale.name()
+    title: locale.name(),
+    content: makeContent()
   });
 
   // Opens the infoWindow when marker is clicked on
-  marker.addListener('click', (function( infoWindow, marker ) {
-    return function() {
-      infoWindow.open(map, marker);
-    }
-  })( infoWindow, marker ));
+  google.maps.event.addListener(marker, 'click', function( ) {
+    console.log( locale.name() );
+    var current = viewModel.getCurrentLocale();
+
+    viewModel.setCurrentLocale( locale );
+    console.log( current().name() );
+    infoWindow.setContent( this.content );
+    infoWindow.open( map, this );
+  });
+
+  ko.applyBindings( viewModel, marker.content)
 
   // this is where the pin actually gets added to the map.
   // bounds.extend() takes in a map location object

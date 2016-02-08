@@ -54,44 +54,82 @@ var locale = function( data ) {
   this.foursquare = ko.observable({});
 };
 
+/******************************************************************************************/
+/*      CONSTANTS
+/******************************************************************************************/
+
+var INFO_TEXT =  '<div data-bind="with: currentLocale" id="info-window">'+
+                  '<h1 data-bind="text: name" id="iw-title"></h1>'+
+                  '<div id="bodyContent">'+
+                    '<div id="iw-images">' +
+                    '<!-- ko foreach: images -->' +
+                    '<img data-bind="attr: {src: imgURL, title: title}" src="" title="">' +
+                    '<!-- /ko -->' +
+                    '</div>' +
+                  '</div>'+
+                '</div>';
+
 // Variable definitions for API calls
 // Flickr
-var flickrKey = "&api_key=36733d31ced0a6a0512c8c1768e63ec7";
-var flickrGetImgsURL = "https://api.flickr.com/services/rest/?format=json&method=flickr.photos.search&content_type=1&sort=date-taken-desc&nojsoncallback=1&text=";
-var flickrImgInfoURL = "https://api.flickr.com/services/rest/?format=json&method=flickr.photos.getInfo&nojsoncallback=1&photo_id=";
-var flickrImg = "http://www.flickr.com/photos/";
+var FLICKR_KEY = "&api_key=36733d31ced0a6a0512c8c1768e63ec7";
+var FLICKR_IMGS_URL = "https://api.flickr.com/services/rest/?format=json&method=flickr.photos.search&content_type=1&sort=date-taken-desc&nojsoncallback=1&text=";
+var FLICKR_IMG_INFO_URL = "https://api.flickr.com/services/rest/?format=json&method=flickr.photos.getInfo&nojsoncallback=1&photo_id=";
+var FLICKR_IMG = "http://www.flickr.com/photos/";
 
 // Wikipedia
-var wikiURL = 'http://en.wikipedia.org/w/api.php?action=opensearch&format=json&callback=wikiCallback&search=';
+var WIKI_URL = 'http://en.wikipedia.org/w/api.php?action=opensearch&format=json&callback=wikiCallback&search=';
 
 // Foursquare
-var fsURL = 'https://api.foursquare.com/v2/venues/search?client_id=2IH1WTOFRXTI4TKYONASQSZO4AZVZBD5VSA0YG0R1GA0M4Z1&client_secret=PJGTUYGXQCZEJKGISLVAQWRTEJBGGIBNW5IUIFGFMQB2ZA1S&limit=1&intent=match&v=20140806&m=foursquare&query=';
+var FS_URL = 'https://api.foursquare.com/v2/venues/search?client_id=2IH1WTOFRXTI4TKYONASQSZO4AZVZBD5VSA0YG0R1GA0M4Z1&client_secret=PJGTUYGXQCZEJKGISLVAQWRTEJBGGIBNW5IUIFGFMQB2ZA1S&limit=1&intent=match&v=20140806&m=foursquare&query=';
+
+/******************************************************************************************/
+/*      VIEW MODEL
+/******************************************************************************************/
 
 var ViewModel = function() {
+/******************************************************************************************/
+/*      VARIABLES
+/******************************************************************************************/
+
   var self = this;
   var APIURL,
+      map,
+      infoWindow,
+      marker,
       flickrImgInfoAPIURL,
       currentList,
       currentItem,
+      tempString,
       newImgURL,
       newAttributionURL,
       newTitle,
       newCaption,
       headlines,
       links,
+      defer,
       i;
+
+  var bounds = new google.maps.LatLngBounds();
+
+  this.currentLocale = ko.observable('');
+
+/******************************************************************************************/
+/*      FUNCTIONS
+/******************************************************************************************/
 
   // Initializes the app
   this.initialize = function() {
     // Creates array of locales
-    self.locales = ko.observableArray([]);
+    this.locales = ko.observableArray([]);
 
     initialLocales.forEach( function( newLoc ) {
       self.locales.push( new locale( newLoc ) );
     });
 
+    self.setCurrentLocale( self.locales()[0] );
+
     // Get API info for each locale
-    this.locales().forEach( function( locale ){
+    self.locales().forEach( function( locale ){
       self.getImages( locale );
       self.getWikiArticles( locale );
       self.getFourSquare( locale );
@@ -102,37 +140,33 @@ var ViewModel = function() {
 
       // Adds each locale as a marker on the map
       this.locales().forEach( function( locale ) {
-        addMarker( locale );
+        addMarker( locale, self );
       });
   }
 
+  this.setCurrentLocale = function( locale ) {
+    var defer = $.Deferred();
+
+    self.currentLocale( locale );
+
+    defer.resolve();
+
+    return defer;
+  };
+
+  this.getCurrentLocale = function( locale ) {
+    return self.currentLocale;
+  }
+
+/******************************************************************************************/
+/*      API HANDLERS
+/******************************************************************************************/
+
   // Get Flickr images for specified locale
   this.getImages = function( locale ) {
-    APIURL = flickrGetImgsURL + '"' + locale.name() + '" ' + locale.city() + flickrKey;
+    APIURL = FLICKR_IMGS_URL + '"' + locale.name() + '" ' + locale.city() + FLICKR_KEY;
 
     self.callFlickrAPI( locale );
-  };
-
-  // Calls the Flickr flickr.photos.search API for the array of images
-  // Hands the array off to the parseImages function
-  this.callFlickrAPI = function( locale ) {
-    $.getJSON( APIURL, function( data ) {
-      self.parseImages( data, locale );
-    }).fail( function( data, textStatus, error ) {
-      console.log( data );
-      console.error("getJSON failed, status: " + textStatus + ", error: "+error)
-    });
-  };
-
-  // Calls the Flickr flickr.photos.getInfo API for image title & caption
-  // Hands the new data off to addImage
-  this.callFlickrImgAPI = function( locale ) {
-    $.getJSON( flickrImgInfoAPIURL, function( data ){
-        self.addImage( data, locale );
-    }).fail( function( data, textStatus, error ) {
-      console.log( data );
-      console.error("getJSON failed, status: " + textStatus + ", error: "+error)
-    });
   };
 
   // Filters through array of images to find 4 for the infoWindow
@@ -151,10 +185,10 @@ var ViewModel = function() {
 
         newImgURL = 'http://farm' + currentItem.farm + '.static.flickr.com/' + currentItem.server + '/' + currentItem.id + '_' + currentItem.secret + '_m.jpg';
 
-        newAttributionURL = flickrImg + currentItem.owner + "/" + currentItem.id;
+        newAttributionURL = FLICKR_IMG + currentItem.owner + "/" + currentItem.id;
 
         // get title & caption info for image
-        flickrImgInfoAPIURL = flickrImgInfoURL + currentItem.id + flickrKey;
+        flickrImgInfoAPIURL = FLICKR_IMG_INFO_URL + currentItem.id + FLICKR_KEY;
 
         self.callFlickrImgAPI( locale );
       }
@@ -178,9 +212,35 @@ var ViewModel = function() {
     }
   }
 
+/******************************************************************************************/
+/*      API CALLS
+/******************************************************************************************/
+
+  // Calls the Flickr flickr.photos.search API for the array of images
+  // Hands the array off to the parseImages function
+  this.callFlickrAPI = function( locale ) {
+    $.getJSON( APIURL, function( data ) {
+      self.parseImages( data, locale );
+    }).fail( function( data, textStatus, error ) {
+      console.log( data );
+      console.error("getJSON failed, status: " + textStatus + ", error: "+error)
+    });
+  };
+
+  // Calls the Flickr flickr.photos.getInfo API for image title & caption
+  // Hands the new data off to addImage
+  this.callFlickrImgAPI = function( locale ) {
+    $.getJSON( flickrImgInfoAPIURL, function( data ){
+        self.addImage( data, locale );
+    }).fail( function( data, textStatus, error ) {
+      console.log( data );
+      console.error("getJSON failed, status: " + textStatus + ", error: "+error)
+    });
+  };
+
   // Gets related Wikipedia articles based on locale name
   this.getWikiArticles = function( locale ) {
-    APIURL = wikiURL + locale.name();
+    APIURL = WIKI_URL + locale.name();
 
     var wikiError = function() {
       console.log( 'wiki error' );
@@ -213,7 +273,7 @@ var ViewModel = function() {
 
   // Gets Foursquare data associated with locale
   this.getFourSquare = function( locale ) {
-    APIURL = fsURL + locale.name() + '&ll=' + locale.lat() + ',' + locale.long();
+    APIURL = FS_URL + locale.name() + '&ll=' + locale.lat() + ',' + locale.long();
 
     $.getJSON( APIURL, function( data ){
       currentList = data.response.venues;
@@ -235,6 +295,67 @@ var ViewModel = function() {
       console.error("getJSON failed, status: " + textStatus + ", error: "+error)
     });
   };
+
+/******************************************************************************************/
+/*      MAP
+/******************************************************************************************/
+
+  var initializeMap = function() {
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: {lat: 35.6008333, lng: -82.5541667}, // Asheville, NC
+      zoom: 12
+    });
+  };
+
+  var addMarker = function( locale ) {
+
+    infoWindow = new google.maps.InfoWindow();
+
+    marker = new google.maps.Marker({
+      position: locale.latlong(),
+      map: map,
+      title: locale.name(),
+      content: makeContent()
+    });
+
+    // Opens the infoWindow when marker is clicked on
+    google.maps.event.addListener(marker, 'click', function( ) {
+      console.log( locale.name() );
+      var current = self.getCurrentLocale();
+
+      self.setCurrentLocale( locale ).done( (function() {
+        infoWindow.setContent( marker.content );
+      })(marker));
+
+      infoWindow.open( map, this );
+    });
+
+    ko.applyBindings( self, marker.content );
+
+    // this is where the pin actually gets added to the map.
+    // bounds.extend() takes in a map location object
+    bounds.extend( locale.latlong() );
+
+    // fit the map to the new marker
+    map.fitBounds(bounds);
+    // center the map
+    map.setCenter(bounds.getCenter());
+  };
+
+  var makeContent = function() {
+    tempString = $.parseHTML(INFO_TEXT)[0];
+    return tempString;
+  };
+/******************************************************************************************/
+/*
+/******************************************************************************************/
+
+  // Vanilla JS way to listen for resizing of the window
+  // and adjust map bounds
+  window.addEventListener('resize', function(e) {
+    // Make sure the map bounds get updated on page resize
+    map.fitBounds(bounds);
+  });
 
   this.initialize();
 };
