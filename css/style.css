@@ -26,7 +26,6 @@ body {
   list-style-type: none;
   margin: 0;
   padding: 0;
-  padding-bottom: auto;
 }
 
 .locale-list li {
