@@ -1,25 +1,30 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="stylesheet" href="css/genericons/genericons.css">
     <link rel="stylesheet" href="css/style.css">
     <meta name=viewport content="width=device-width, height=device-height, initial-scale=1">
   </head>
   <body>
-    <div data-bind="visible: errorHandler().length > 0, text: errorHandler" class="error"></div>
-    <div id="overlay" class="overlay">
-      <input data-bind="value: query, valueUpdate: 'keyup'" class="search" placeholder="Search.." />
-      <ul data-bind="foreach: locales" id="locale-list" class="locale-list">
-        <li>
-          <span data-bind="text: name, click: $root.selectLocale" class="name"></span>
-          <!-- ko if: foursquare() -->
-            <!-- ko foreach: foursquare().categories -->
-            <a data-bind="click: $root.searchCategory" href="#"><em data-bind="text: name" class="category"></em></a>
+    <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+    <label for="nav-trigger" class="genericon genericon-menu"></label>
+    <div class="wrap">
+      <div id="map" class="map"></div>
+      <div data-bind="visible: errorHandler().length > 0, text: errorHandler" class="error"></div>
+      <div id="overlay" class="overlay">
+        <input data-bind="value: query, valueUpdate: 'keyup'" class="search" placeholder="Search.." />
+        <ul data-bind="foreach: locales" id="locale-list" class="locale-list">
+          <li>
+            <span data-bind="text: name, click: $root.selectLocale" class="name"></span>
+            <!-- ko if: foursquare() -->
+              <!-- ko foreach: foursquare().categories -->
+              <a data-bind="click: $root.searchCategory" href="#"><em data-bind="text: name" class="category"></em></a>
+              <!-- /ko -->
             <!-- /ko -->
-          <!-- /ko -->
-        </li>
-      </ul>
+          </li>
+        </ul>
+      </div>
     </div>
-    <div id="map" class="map"></div>
 
     <script type="text/javascript">
       var gmErrorHandling = function() {
