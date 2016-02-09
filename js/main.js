@@ -215,7 +215,7 @@ var ViewModel = function() {
 
       if( self.doesMatch( locale, value ) ) {
         self.locales.push( locale );
-        locale.marker.setMap( map );
+        locale.marker.setVisible( true );
       }
     });
   };
@@ -485,7 +485,7 @@ var ViewModel = function() {
   // Hides all markers from map
   this.hideAllMarkers = function() {
     self.markers().forEach( function( marker ) {
-      marker.setMap( null );
+      marker.setVisible( false );
     });
   };
 
